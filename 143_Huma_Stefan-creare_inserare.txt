@@ -1,0 +1,562 @@
+-- Cerinta 10.
+-- Crearea secventei pentru cheile primare.
+
+create sequence secventa_techflow
+start with 1
+increment by 1
+maxvalue 10000
+minvalue 1
+nocycle
+nocache;
+
+--11. Crearea tabelelor
+
+-- 1 tabel MAGAZINE
+
+create table magazine (
+    id_magazin number(4),
+    nume_magazin varchar2(30) constraint nn_nume_magazin not null,
+    adresa_magazin varchar2(40) constraint nn_adresa_magazin not null,
+    
+    constraint pk_id_magazin primary key(id_magazin)
+);
+
+-- 2 tabel ANGAJATI
+
+create table angajati (
+    id_angajat number(4),
+    nume_angajat varchar2(50) constraint nn_nume_angajat not null,
+    prenume_angajat varchar2(50) constraint nn_prenume_angajat not null,
+    email_angajat varchar2(50),
+    salariu_angajat number(10,2) constraint nn_salariu_angajat not null,
+    job_angajat varchar2(50),
+    id_magazin number(4),
+    
+    constraint pk_id_angajat primary key(id_angajat),
+    constraint fk_id_magazin foreign key(id_magazin)
+    references magazine(id_magazin)
+);
+
+-- 3 tabel PRODUCATORI
+
+create table producatori (
+    id_producator number(4),
+    nume_producator varchar2(50) constraint nn_nume_producator not null,
+    tara_producator varchar(50),
+    
+    constraint pk_id_producator primary key(id_producator)
+);    
+
+-- 4 tabel CATEGORII
+
+create table categorii (
+    id_categorie number(4),
+    nume_categorie varchar2(50) constraint nn_nume_categorie not null,
+    descriere_categorie varchar2(200),
+    
+    constraint pk_id_categorie primary key(id_categorie)
+);
+
+-- 5 tabel PRODUSE
+
+create table produse (
+    id_produs number(4),
+    nume_produs varchar2(50) constraint nn_nume_produs not null,
+    descriere_produs varchar2(200),
+    pret_produs number(10,2),
+    stoc_produs number(3),
+    id_producator number(4),
+    id_categorie number(4),
+    
+    constraint pk_id_produs primary key(id_produs),
+    constraint fk_id_producator foreign key(id_producator)
+    references producatori(id_producator),
+    constraint fk_id_categorie foreign key(id_categorie)
+    references categorii(id_categorie)
+);
+
+-- 6 tabel PRODUSE_MAGAZINE
+
+create table produse_magazine (
+    id_produs number(4),
+    id_magazin number(4),
+    
+    constraint pk_id_produs_id_magazin primary key(id_produs,id_magazin),
+    constraint fk_id_produs_pm foreign key(id_produs)
+    references produse(id_produs),
+    constraint fk_id_magazin_pm foreign key(id_magazin)
+    references magazine(id_magazin)
+);
+
+-- 7 tabel PLATI
+
+create table plati (
+    id_plata number(4),
+    total_plata number(10,2) constraint nn_total_plata not null,
+    tip_plata varchar2(50) constraint nn_tip_plata not null,
+    
+    constraint pk_id_plata primary key(id_plata)
+);
+
+-- 8 tabel TRANSPORT
+
+create table transport (
+    id_transport number(4),
+    firma_transport varchar2(50) constraint nn_firma_transport not null,
+    cost_transport number(10,2) constraint nn_cost_transport not null,
+    
+    constraint pk_id_transport primary key (id_transport)
+);
+
+-- 9 tabel CLIENTI
+
+create table clienti (
+    id_client number(4),
+    nume_client varchar2(50),
+    prenume_client varchar2(50),
+    email_client varchar2(35),
+    telefon_client varchar2(20),
+    data_inregistrare date,
+    
+    constraint pk_id_client primary key (id_client)
+);
+
+-- 10 tabel COMENZI
+
+create table comenzi (
+    id_comanda number(4),
+    data_plasare date,
+    status_comanda varchar2(50),
+    id_client number(4),
+    id_plata number(4),
+    id_transport number(4),
+    
+    constraint pk_id_comanda primary key (id_comanda),
+    constraint fk_id_client foreign key (id_client)
+    references clienti(id_client),
+    constraint fk_id_plata foreign key (id_plata)
+    references plati(id_plata),
+    constraint fk_id_transport foreign key (id_transport)
+    references transport(id_transport)
+);
+
+-- 11 tabel PRODUSE_COMENZI
+
+create table produse_comenzi (
+    id_produs number(4),
+    id_comanda number(4),
+    
+    constraint pk_id_produs_id_comanda primary key(id_produs,id_comanda),
+    constraint fk_id_produs_pc foreign key(id_produs)
+    references produse(id_produs),
+    constraint fk_id_comanda_pc foreign key(id_comanda)
+    references comenzi(id_comanda)
+);
+
+-- 12 tabel WISHLIST
+
+create table wishlist (
+    id_wishlist number(4),
+    data_adaugare date,
+    id_client number(4),
+    
+    constraint pk_id_wishlist primary key (id_wishlist),
+    constraint fk_id_client_wl foreign key (id_client)
+    references clienti(id_client)
+);
+
+-- 13 tabel PRODUSE_WISHLIST
+
+create table produse_wishlist (
+    id_produs number(4),
+    id_wishlist number(4),
+    
+    constraint pk_id_produs_id_wishlist primary key(id_produs,id_wishlist),
+    constraint fk_id_produs_pw foreign key(id_produs)
+    references produse(id_produs),
+    constraint fk_id_wishlist_pw foreign key(id_wishlist)
+    references wishlist(id_wishlist)
+);
+
+-- 14 tabel RECENZII
+
+create table recenzii (
+    id_recenzie number(4),
+    nota_recenzie number(2,1),
+    id_client number(4),
+    id_produs number(4),
+    
+    constraint pk_id_recenzie primary key (id_recenzie),
+    constraint fk_id_client_rz foreign key (id_client)
+    references clienti(id_client),
+    constraint fk_id_produs_rz foreign key (id_produs)
+    references produse(id_produs)
+);
+    
+-- b). Inserarea datelor
+
+-- 1 tabel MAGAZINE
+
+insert into magazine
+values (secventa_techflow.nextval, 'TechFlow Red', 'Bacau');
+
+insert into magazine
+values (secventa_techflow.nextval, 'TechFlow Blue', 'Bucuresti');
+
+insert into magazine
+values (secventa_techflow.nextval, 'TechFlow Black', 'Cluj');
+
+insert into magazine
+values (secventa_techflow.nextval, 'TechFlow Green', 'Iasi');
+
+insert into magazine
+values (secventa_techflow.nextval, 'TechFlow Yellow', 'Brasov');
+
+select * from magazine;
+
+-- 2 tabel ANGAJATI
+
+insert into angajati
+values (secventa_techflow.nextval, 'Popescu', 'Ion', 'ion.popescu@example.com', 2500.00, 'Casier', 1);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Ionescu', 'Maria', 'maria.ionescu@example.com', 3000.00, 'Manager', 1);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Popa', 'Andrei', 'andrei.popa@example.com', 2200.00, 'Casier', 2);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Dragomir', 'Elena', 'elena.dragomir@example.com', 2800.00, 'Manager', 2);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Georgescu', 'Alexandru', 'alexandru.georgescu@example.com', 2400.00, 'Casier', 3);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Gheorghe', 'Mihai', 'mihai.gheorghe@example.com', 3100.00, 'Manager', 3);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Pop', 'Adrian', 'adrian.pop@example.com', 2300.00, 'Casier', 4);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Vasile', 'Ioana', 'ioana.vasile@example.com', 2900.00, 'Manager', 4);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Stan', 'Daniel', 'daniel.stan@example.com', 2600.00, 'Casier', 5);
+
+insert into angajati
+values (secventa_techflow.nextval, 'Nistor', 'Cristina', 'cristina.nistor@example.com', 3300.00, 'Manager', 5);
+
+select * from angajati;
+
+-- 3 tabel PRODUCATORI (inserare explicita)
+
+insert into producatori (id_producator, nume_producator, tara_producator)
+values (secventa_techflow.nextval, 'Stentor', 'Romania');
+
+insert into producatori (id_producator, nume_producator, tara_producator)
+values (secventa_techflow.nextval, 'PC Master', 'Germania');
+
+insert into producatori (id_producator, nume_producator, tara_producator)
+values (secventa_techflow.nextval, 'HardwareCO', 'Franta');
+
+insert into producatori (id_producator, nume_producator, tara_producator)
+values (secventa_techflow.nextval, 'VideoMaster', 'Italia');
+
+insert into producatori (id_producator, nume_producator, tara_producator)
+values (secventa_techflow.nextval, 'SiSoft', 'Spania');
+
+select * from producatori;
+
+-- 4 tabel CATEGORII
+
+insert into categorii
+values (secventa_techflow.nextval, 'Placi de baza', 'Categorie dedicata placilor de baza');
+
+insert into categorii
+values (secventa_techflow.nextval, 'Procesoare', 'Categorie dedicata procesoarelor');
+
+insert into categorii
+values (secventa_techflow.nextval, 'Placi video', 'Categorie dedicata placilor video');
+
+insert into categorii
+values (secventa_techflow.nextval, 'Memorii RAM', 'Categorie dedicata modulelor de memorie RAM');
+
+insert into categorii
+values (secventa_techflow.nextval, 'Stocare ROM', 'Categorie dedicata solutiilor de stocare');
+
+select * from categorii;
+
+-- 5 tabel PRODUSE
+
+insert into produse
+values (secventa_techflow.nextval, 'ASUS ROG Strix X570-E Gaming', 'Placă de bază ATX pentru gaming, compatibilă cu procesoare AMD Ryzen', 1599.99, 10, 16, 21);
+
+insert into produse
+values (secventa_techflow.nextval, 'Intel Core i9-10900K', 'Procesor Intel de ultimă generație cu 10 nuclee și 20 fire de execuție', 2899.99, 5, 16, 22);
+
+insert into produse
+values (secventa_techflow.nextval, 'NVIDIA GeForce RTX 3080', 'Placă video high-end pentru gaming, cu 10 GB memorie GDDR6X', 5299.99, 3, 17, 23);
+
+insert into produse
+values (secventa_techflow.nextval, 'Corsair Vengeance RGB Pro', 'Modul de memorie DDR4 cu iluminare RGB și capacitate de 16 GB', 699.99, 20, 17, 24);
+
+insert into produse
+values (secventa_techflow.nextval, 'Samsung 970 EVO Plus', 'Solid State Drive NVMe cu capacitate de 1 TB și viteză de transfer ridicată', 999.99, 8, 17, 25);
+
+insert into produse
+VALUES (secventa_techflow.nextval, 'MSI B450 TOMAHAWK MAX', 'Placă de bază ATX pentru procesoare AMD Ryzen, suportă memorie DDR4', 599.99, 15, 18, 21);
+
+insert into produse
+VALUES (secventa_techflow.nextval, 'AMD Ryzen 7 5800X', 'Procesor AMD cu 8 nuclee și 16 fire de execuție, frecvență de bază 3.8 GHz', 1999.99, 7, 18, 22);
+
+insert into produse
+VALUES (secventa_techflow.nextval, 'Gigabyte GeForce GTX 1660 SUPER OC', 'Placă video performantă pentru gaming, 6 GB memorie GDDR6', 1799.99, 10, 19, 23);
+
+insert into produse
+VALUES (secventa_techflow.nextval, 'RAM Kingston HyperX Fury RGB', 'Modul de memorie DDR4 cu iluminare RGB și capacitate de 32 GB', 1299.99, 12, 19, 24);
+
+insert into produse
+VALUES (secventa_techflow.nextval, 'SSD Western Digital Blue', 'Solid State Drive SATA cu capacitate de 500 GB și viteză de transfer mare', 399.99, 25, 20, 25);
+
+select * from produse;
+
+-- 6 tabel PRODUSE_MAGAZINE
+
+-- Magazinul - TechFlow Red
+-- Produs - ASUS ROG Strix X570-E Gaming
+insert into produse_magazine
+values (26, 1);
+
+-- Produs - Intel Core i9-10900K
+insert into produse_magazine
+values (27, 1);
+
+-- Magazinul - TechFlow Blue
+-- Produs - ASUS ROG Strix X570-E Gaming
+insert into produse_magazine
+values (26,2);
+
+-- Produs - Corsair Vengeance RGB Pro
+insert into produse_magazine
+values (29,2);
+
+-- Magazinul - TechFlow Black
+-- Produs - Samsung 970 EVO Plus
+insert into produse_magazine
+values (30,3);
+
+-- Produs - Intel Core i9-10900K
+insert into produse_magazine
+values (27,3);
+
+-- Magazinul - TechFlow Green
+-- Produs - AMD Ryzen 7 5800X
+insert into produse_magazine
+values (32,4);
+
+-- Produs - Gigabyte GeForce GTX 1660 SUPER OC
+insert into produse_magazine
+values (33,4);
+
+-- Magazinul - TechFlow Yellow
+-- Produs - RAM Kingston HyperX Fury RGB
+insert into produse_magazine
+values (34,5);
+
+-- Produs - Gigabyte GeForce GTX 1660 SUPER OC
+insert into produse_magazine
+values (33,5);
+
+select * from produse_magazine;
+
+-- 7 tabel PLATI
+
+-- total_plata id_produs : 26 + 30
+insert into plati (id_plata, total_plata, tip_plata)
+values (secventa_techflow.nextval, 2598.99, 'Card');
+
+-- total_plata id_produs : 29 + 35 + 31
+insert into plati (id_plata, total_plata, tip_plata)
+values (secventa_techflow.nextval, 1699.97, 'Numerar');
+
+-- total_plata id_produs : 27 + 34
+insert into plati (id_plata, total_plata, tip_plata)
+values (secventa_techflow.nextval, 4199.98, 'Transfer bancar');
+
+-- total_plata id_produs : 28 + 31
+insert into plati (id_plata, total_plata, tip_plata)
+values (secventa_techflow.nextval, 5899.98, 'Card');
+
+-- total_plata id_produs : 29 + 33
+insert into plati (id_plata, total_plata, tip_plata)
+values (secventa_techflow.nextval, 2499.98, 'Numerar');
+
+select * from plati;
+
+-- 8 tabel TRANSPORT
+
+insert into transport
+values (secventa_techflow.nextval, 'Cargus', 100.00);
+
+insert into transport
+values (secventa_techflow.nextval, 'Fan Courier', 150.50);
+
+insert into transport
+values (secventa_techflow.nextval, 'Same Day', 200.75);
+
+insert into transport
+values (secventa_techflow.nextval, 'DPD', 180.25);
+
+insert into transport
+values (secventa_techflow.nextval, 'DHL', 220.00);
+
+select * from transport;
+
+-- 9 tabel CLIENTI
+insert into clienti
+VALUES (secventa_techflow.nextval, 'Avram', 'Gabriela', 'gabriela.avram@example.com', '0776123456', TO_DATE('2023-05-12', 'YYYY-MM-DD'));
+
+insert into clienti
+VALUES (secventa_techflow.nextval, 'Constantin', 'Mihai', 'mihai.constantin@example.com', '0787123456', TO_DATE('2023-03-15', 'YYYY-MM-DD'));
+
+insert into clienti
+VALUES (secventa_techflow.nextval, 'Dumitru', 'Adriana', 'adriana.dumitru@example.com', '0798123456', TO_DATE('2023-01-14', 'YYYY-MM-DD'));
+
+insert into clienti
+VALUES (secventa_techflow.nextval, 'Florescu', 'Valentin', 'valentin.florescu@example.com', '0709123456', TO_DATE('2023-02-13', 'YYYY-MM-DD'));
+
+insert into clienti
+VALUES (secventa_techflow.nextval, 'Gheorghe', 'Cristina', 'cristina.gheorghe@example.com', '0710123456', TO_DATE('2023-03-12', 'YYYY-MM-DD'));
+
+select * from clienti;
+
+-- 10 tabel COMENZI
+
+insert into comenzi
+values (secventa_techflow.nextval, to_date('2023-05-15', 'YYYY-MM-DD'), 'Noua', 46, 36, 41);
+
+insert into comenzi
+values (secventa_techflow.nextval, to_date('2023-05-10', 'YYYY-MM-DD'), 'Confirmata', 47, 37, 41);
+
+insert into comenzi
+values (secventa_techflow.nextval, to_date('2023-04-15', 'YYYY-MM-DD'), 'Anulata', 46, 38, 41);
+
+insert into comenzi
+values (secventa_techflow.nextval, to_date('2023-05-15', 'YYYY-MM-DD'), 'Noua', 48, 39, 42);
+
+insert into comenzi
+values (secventa_techflow.nextval, to_date('2023-05-09', 'YYYY-MM-DD'), 'Confirmata', 49, 40, 44);
+
+select * from comenzi;
+
+-- 11 tabel PRODUSE_COMENZI
+
+insert into produse_comenzi
+values (26,51);
+
+insert into produse_comenzi
+values (30,51);
+
+insert into produse_comenzi
+values (29,52);
+
+insert into produse_comenzi
+values (35,52);
+
+insert into produse_comenzi
+values (31,52);
+
+insert into produse_comenzi
+values (27,53);
+
+insert into produse_comenzi
+values (34,53);
+
+insert into produse_comenzi
+values (28,54);
+
+insert into produse_comenzi
+values (31,54);
+
+insert into produse_comenzi
+values (29,55);
+
+insert into produse_comenzi
+values (33,55);
+
+select * from produse_comenzi;
+
+-- 12 tabel WISHLIST
+
+insert into wishlist
+values (secventa_techflow.nextval, to_date('2023-05-14', 'YYYY-MM-DD'), 46);
+
+insert into wishlist
+values (secventa_techflow.nextval, to_date('2023-05-13', 'YYYY-MM-DD'), 47);
+
+insert into wishlist
+values (secventa_techflow.nextval, to_date('2023-05-12', 'YYYY-MM-DD'), 48);
+
+insert into wishlist
+values (secventa_techflow.nextval, to_date('2023-05-11', 'YYYY-MM-DD'), 49);
+
+insert into wishlist
+values (secventa_techflow.nextval, to_date('2023-05-10', 'YYYY-MM-DD'), 50);
+
+select * from wishlist;
+
+-- 13 tabel PRODUSE_WISHLIST
+
+insert into produse_wishlist
+values (27,56);
+
+insert into produse_wishlist
+values (28,56);
+
+insert into produse_wishlist
+values (29,57);
+
+insert into produse_wishlist
+values (31,57);
+
+insert into produse_wishlist
+values (31,58);
+
+insert into produse_wishlist
+values (27,58);
+
+insert into produse_wishlist
+values (34,59);
+
+insert into produse_wishlist
+values (27,59);
+
+insert into produse_wishlist
+values (31,60);
+
+insert into produse_wishlist
+values (28,60);
+
+insert into produse_wishlist
+values (26,60);
+
+select * from produse_wishlist;
+
+-- 14 tabel RECENZII
+
+insert into recenzii
+values (secventa_techflow.nextval, 4.5, 46, 26);
+
+insert into recenzii
+values (secventa_techflow.nextval, 3.8, 47, 27);
+
+insert into recenzii
+values (secventa_techflow.nextval, 4.2, 48, 28);
+
+insert into recenzii
+values (secventa_techflow.nextval, 5.0, 49, 29);
+
+insert into recenzii
+values (secventa_techflow.nextval, 3.5, 50, 30);
+
+select * from recenzii;
