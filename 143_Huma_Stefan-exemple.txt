@@ -94,3 +94,32 @@ end as comparatie
 from
   plata_totala_client ptc,
   plata_medie_client pmc;
+
+-- Cerinta 13
+--1 Actualizarea unui client
+update clienti
+set nume_client = 'Noul Nume', prenume_client = 'Noul Prenume'
+where id_client = (
+  select id_client
+  from clienti
+  where nume_client = 'Vechiul Nume' and prenume_client = 'Vechiul Prenume'
+);
+
+--2 Stergerea comenzilor unui client
+
+delete from comenzi
+where id_client = (
+  select id_client
+  from clienti
+  where nume_client = 'Nume Client' and prenume_client = 'Prenume Client'
+);
+
+--3 Actualizarea platilor dupa o anumita data cu un adaos de 10%
+
+update plati
+set total_plata = total_plata * 1.1
+where id_plata in (
+  select id_plata
+  from comenzi
+  where data_plasare > to_date('2022-01-01', 'YYYY-MM-DD')
+);
