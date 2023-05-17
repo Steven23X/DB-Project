@@ -1,0 +1,96 @@
+-- Cerinta 12
+
+-- 1.
+-- Afiseaza numele produselor și prețurile acestora din toate comenzile plasate de clientul Avram Gabriela.
+
+--   subcerere sincronizata în care intervin 3 tabele ( produse, produse_comenzi, clienti)
+--   utilizarea a doua functii pe siruri de caractere
+
+select p.nume_produs, p.pret_produs
+from produse p
+where exists (
+    select 'x'
+    from produse_comenzi pc
+    join comenzi c on pc.id_comanda = c.id_comanda
+    join clienti cl on c.id_client = cl.id_client
+    where pc.id_produs = p.id_produs
+    and lower(cl.nume_client) = 'avram'
+    and lower(cl.prenume_client) = 'gabriela'
+);
+
+-- 2.
+-- Pentru fiecare magazin, sa se afiseze denumirea acestuia,
+-- precum si numele şi salariul celor mai slab platiti angajati din cadrul sau.
+
+-- subcerere nesincronizata în clauza FROM
+
+select m.nume_magazin, ang.nume, ang.salariu
+from magazine m,
+    (select a.id_magazin, a.nume_angajat as nume, a.salariu_angajat as salariu
+    from angajati a
+    where a.salariu_angajat = (select min(a2.salariu_angajat)
+                               from angajati a2
+                               where a2.id_magazin = a.id_magazin)
+    ) ang
+where m.id_magazin = ang.id_magazin;
+
+-- 3.
+-- Afisati codul magazinului, numele magazinului, salariul mediu si numarul de produse pentru fiecare magazin. 
+-- Filtrati rezultatele astfel incat sa includa doar magazinele care au cel putin 2 produse si salariul fiecarui
+-- angajat sa fie mai mic decat cel mai mic salariu mediu al angajatilor de la oricare alt magazin.
+
+-- grupări de date cu subcereri nesincronizate in care intervin cel putin 3 tabele, funcții grup, filtrare la nivel de grupuri
+
+select m.id_magazin, m.nume_magazin, avg(a.salariu_angajat) as salariu_mediu, count(pm.id_produs) as numar_produse 
+from magazine m
+join angajati a on m.id_magazin = a.id_magazin
+join produse_magazine pm on m.id_magazin = pm.id_magazin
+where a.salariu_angajat < ( select min(avg_salariu) 
+                            from (select avg(salariu_angajat) AS avg_salariu
+                                  from angajati
+                                  group by id_magazin
+                                  )
+) 
+group by m.id_magazin, m.nume_magazin
+having count(pm.id_produs) >= 2;
+
+-- 4.
+
+-- Afisati numele produsului, nota recenziei (inlocuind valorile nule cu 0) si starea recenziei
+--(afisand "Fara recenzii" pentru valorile nule si "Cu recenzii" pentru valorile nenule) pentru fiecare produs . 
+-- Rezultatele sunt sortate in ordine descrescatoare dupa numele produsului.
+
+-- ordonare si utilizarea funcțiilor NVL și DECODE (in cadrul aceleiasi cereri)
+
+select p.nume_produs, nvl(r.nota_recenzie, 0) as nota_recenzie,
+       decode(r.nota_recenzie, null, 'Fără recenzii', 'Cu recenzii') as stare_recenzie
+from produse p
+left join recenzii r on p.id_produs = r.id_produs
+order by p.nume_produs desc;
+
+-- 5.
+-- Sa se afiseze numele clientului, suma totala a platilor efectuate de fiecare client, luna si ziua inregistrarii clientului si 
+-- o comparatie a platilor fiecarui client cu media platilor pentru toti clientii. 
+-- Media platilor sa fie calculata pe baza sumelor totale ale fiecarui client.
+
+-- 2 funcții pe date calendaristice , clauza WITH
+with
+plata_totala_client as (  select cl.id_client,cl.nume_client,cl.prenume_client,sum(p.total_plata) as plata_client,cl.data_inregistrare
+                           from clienti cl
+                           join comenzi co on cl.id_client = co.id_client
+                           join plati p on co.id_plata = p.id_plata
+                           group by cl.id_client,cl.nume_client,cl.prenume_client,cl.data_inregistrare
+                         ),
+plata_medie_client as (select avg(plata_client) AS plata_medie
+                        from plata_totala_client
+                      )
+select ptc.nume_client, ptc.prenume_client,ptc.plata_client, 
+to_char(ptc.data_inregistrare,'MM')luna_inregistrare,to_char(ptc.data_inregistrare,'DD') zi_inregistrare,
+case
+    when ptc.plata_client > pmc.plata_medie then 'Peste medie'
+    when ptc.plata_client < pmc.plata_medie then 'Sub medie'
+    else 'Medie'
+end as comparatie
+from
+  plata_totala_client ptc,
+  plata_medie_client pmc;
