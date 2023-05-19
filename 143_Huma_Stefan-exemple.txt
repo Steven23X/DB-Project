@@ -96,6 +96,7 @@ from
   plata_medie_client pmc;
 
 -- Cerinta 13
+
 --1 Actualizarea unui client
 update clienti
 set nume_client = 'Noul Nume', prenume_client = 'Noul Prenume'
@@ -123,3 +124,35 @@ where id_plata in (
   from comenzi
   where data_plasare > to_date('2022-01-01', 'YYYY-MM-DD')
 );
+
+-- Cerinta 14
+
+-- Rezultatul final al vizualizarii va fi un set de date care va afisa numele si prenumele clientului,
+-- numarul total de comenzi, suma totala a platilor si data cea mai recenta de plasare
+-- a unei comenzi pentru fiecare client.
+create view vizualizare_comenzi as
+
+select c.nume_client, c.prenume_client, count(co.id_comanda) as numar_comenzi,
+sum(p.total_plata) AS suma_totala_plati,max(co.data_plasare) AS ultima_data_plasare
+from clienti c
+join comenzi co on c.id_client = co.id_client
+join plati p on co.id_plata = p.id_plata
+group by c.nume_client, c.prenume_client;
+
+-- Exemple de operatii LMD permise
+-- SELECT: Puteti executa operatii de selectare asupra vizualizarii
+
+select * from vizualizare_comenzi;
+
+-- JOIN: Puteti efectua operatii de imbinare cu alte tabele
+
+select vc.*,c.email_client,c.telefon_client
+from vizualizare_comenzi vc
+join clienti c on vc.nume_client=c.nume_client;
+
+-- Exemplu de operatie LMD nepermisa pe vizualizare
+-- UPDATE:
+update vizualizare_comenzi
+set numar_comenzi = 10
+where nume_client = 'Dumitru';
+
