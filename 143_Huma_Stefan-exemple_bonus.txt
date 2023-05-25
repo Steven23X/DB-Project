@@ -1,4 +1,5 @@
 -- Cerinta 14
+-- QT3Qk1PpCaGES9Ip
 
 -- Rezultatul final al vizualizarii va fi un set de date care va afisa numele si prenumele clientului,
 -- numarul total de comenzi, suma totala a platilor si data cea mai recenta de plasare
@@ -166,3 +167,27 @@ commit;
 --T1
 select salariu_angajat from ang where id_angajat = 7;
 -- valoare: 8000
+
+
+-- Cerinta 19
+
+create index idx_pret_produs on produse (pret_produs);
+create index idx_nume_producator on producatori (nume_producator);
+create index idx_nume_categorie on categorii (nume_categorie);
+
+-- 1. Afisati toate produsele din interval de pret [1000,2000] si numele producatorilor.
+-- optimizare : va fi folosit idx_pret_produs si idx_nume_producator
+
+select p.nume_produs, pr.nume_producator
+from produse p
+join producatori pr on p.id_producator = pr.id_producator
+where p.pret_produs between 1000 and 2000;
+
+-- 2. Afisati numarul de produse din fiecare categorie si numele categoriilor.
+-- optimizare : va fi folosit idx_nume_categorie and idk pt id_produs deoarece este PK
+-- (indexul este creat o data cu adaugarea constrangerii)
+
+select c.nume_categorie, count(p.id_produs) as numar_produse
+from categorii c
+join produse p on p.id_categorie = c.id_categorie
+group by c.nume_categorie;
