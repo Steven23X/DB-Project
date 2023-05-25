@@ -105,3 +105,64 @@ from clienti cl
 join vizualizare_comenzi_noi vcn on (cl.id_client=vcn.id_client);
 
 -- Cerinta 18
+
+--T1
+create table ang as select * from angajati; 
+select * from ang;
+
+--dirty write 
+
+--T1
+select salariu_angajat from ang where id_angajat = 7;
+-- valoare: 3000
+
+update ang
+set salariu_angajat = salariu_angajat  + 1000
+where id_angajat = 7;
+
+--T2
+update ang
+set salariu_angajat = salariu_angajat  + 2000
+where id_angajat = 7;
+
+--T1
+rollback;
+
+
+--T2
+select salariu_angajat from ang where id_angajat = 7;
+--valoare : 5000
+commit;
+
+--T1
+select salariu_angajat from ang where id_angajat = 7;
+--valoare: 5000  (nu se inregistreaza 6000)
+
+
+--lost update 
+
+--T1
+select salariu_angajat from ang where id_angajat = 7;
+-- valoare: 5000
+
+update ang
+set salariu_angajat = salariu_angajat  + 1000
+where id_angajat = 7;
+
+--T2
+update ang
+set salariu_angajat = salariu_angajat  + 2000
+where id_angajat = 7;
+
+--T1
+commit;
+
+--T2
+
+select salariu_angajat from ang where id_angajat = 7;
+commit;
+-- valoare: 8000, nu se inregistreaza 7000
+
+--T1
+select salariu_angajat from ang where id_angajat = 7;
+-- valoare: 8000
