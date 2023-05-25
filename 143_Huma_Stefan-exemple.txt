@@ -1,6 +1,7 @@
 -- Cerinta 12
 
 -- 1.
+
 -- Afiseaza numele produselor și prețurile acestora din toate comenzile plasate de clientul Avram Gabriela.
 
 --   subcerere sincronizata în care intervin 3 tabele ( produse, produse_comenzi, clienti)
@@ -19,6 +20,7 @@ where exists (
 );
 
 -- 2.
+
 -- Pentru fiecare magazin, sa se afiseze denumirea acestuia,
 -- precum si numele şi salariul celor mai slab platiti angajati din cadrul sau.
 
@@ -35,6 +37,7 @@ from magazine m,
 where m.id_magazin = ang.id_magazin;
 
 -- 3.
+
 -- Afisati codul magazinului, numele magazinului, salariul mediu si numarul de produse pentru fiecare magazin. 
 -- Filtrati rezultatele astfel incat sa includa doar magazinele care au cel putin 2 produse si salariul fiecarui
 -- angajat sa fie mai mic decat cel mai mic salariu mediu al angajatilor de la oricare alt magazin.
@@ -69,6 +72,7 @@ left join recenzii r on p.id_produs = r.id_produs
 order by p.nume_produs desc;
 
 -- 5.
+
 -- Sa se afiseze numele clientului, suma totala a platilor efectuate de fiecare client, luna si ziua inregistrarii clientului si 
 -- o comparatie a platilor fiecarui client cu media platilor pentru toti clientii. 
 -- Media platilor sa fie calculata pe baza sumelor totale ale fiecarui client.
@@ -98,6 +102,7 @@ from
 -- Cerinta 13
 
 --1 Actualizarea unui client
+
 update clienti
 set nume_client = 'Noul Nume', prenume_client = 'Noul Prenume'
 where id_client = (
@@ -124,69 +129,3 @@ where id_plata in (
   from comenzi
   where data_plasare > to_date('2022-01-01', 'YYYY-MM-DD')
 );
-
--- Cerinta 14
-
--- Rezultatul final al vizualizarii va fi un set de date care va afisa numele si prenumele clientului,
--- numarul total de comenzi, suma totala a platilor si data cea mai recenta de plasare
--- a unei comenzi pentru fiecare client.
-create view vizualizare_comenzi as
-
-select c.nume_client, c.prenume_client, count(co.id_comanda) as numar_comenzi,
-sum(p.total_plata) AS suma_totala_plati,max(co.data_plasare) AS ultima_data_plasare
-from clienti c
-join comenzi co on c.id_client = co.id_client
-join plati p on co.id_plata = p.id_plata
-group by c.nume_client, c.prenume_client;
-
--- Exemple de operatii LMD permise
--- SELECT: Puteti executa operatii de selectare asupra vizualizarii
-
-select * from vizualizare_comenzi;
-
--- JOIN: Puteti efectua operatii de imbinare cu alte tabele
-
-select vc.*,c.email_client,c.telefon_client
-from vizualizare_comenzi vc
-join clienti c on vc.nume_client=c.nume_client;
-
--- Exemplu de operatie LMD nepermisa pe vizualizare
--- UPDATE:
-update vizualizare_comenzi
-set numar_comenzi = 10
-where nume_client = 'Dumitru';
-
--- Cerinta 15
-
--- o cerere ce utilizează operația outerjoin pe minimum 4 tabele
--- Sa se afiseze numele magazinului, id-ul magazinului, id-ul produsului 
--- si id-ul recenziei pentru fiecare inregistrare disponibila in baza de date. 
-select m.nume_magazin, pm.id_magazin, p.id_produs, r.id_recenzie
-from magazine m
-left join produse_magazine pm on m.id_magazin = pm.id_magazin
-inner join produse p on pm.id_produs = p.id_produs
-right join recenzii r on pm.id_produs = r.id_produs;
-
--- o cerere ce utilizează operația division
--- Afiseaza numele produselor care nu au fost comandate de niciun client
-
-select p.nume_produs
-from produse p
-minus
-select p.nume_produs
-from produse p
-join produse_comenzi pc on p.id_produs = pc.id_produs
-join comenzi c on pc.id_comanda = c.id_comanda;
-
--- o cerere care implementeaza analiza top-n
--- Afiseaza primele 5 produse (descrescator) in functie de numarul de recenzii
-select *
-from (
-    select p.nume_produs, count(r.id_recenzie) as numar_recenzii
-    from produse p
-    left join produse_magazine pm on p.id_produs = pm.id_produs
-    left join recenzii r on pm.id_produs = r.id_produs
-    group by p.nume_produs
-    order by count(r.id_recenzie) desc
-)
-where rownum <= 3;

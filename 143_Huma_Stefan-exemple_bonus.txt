@@ -1,0 +1,107 @@
+-- Cerinta 14
+
+-- Rezultatul final al vizualizarii va fi un set de date care va afisa numele si prenumele clientului,
+-- numarul total de comenzi, suma totala a platilor si data cea mai recenta de plasare
+-- a unei comenzi pentru fiecare client.
+
+create view vizualizare_comenzi as
+select c.nume_client, c.prenume_client, count(co.id_comanda) as numar_comenzi,
+sum(p.total_plata) AS suma_totala_plati,max(co.data_plasare) AS ultima_data_plasare
+from clienti c
+join comenzi co on c.id_client = co.id_client
+join plati p on co.id_plata = p.id_plata
+group by c.nume_client, c.prenume_client;
+
+-- Exemple de operatii LMD permise
+-- SELECT: Puteti executa operatii de selectare asupra vizualizarii
+
+select * from vizualizare_comenzi;
+
+-- JOIN: Puteti efectua operatii de imbinare cu alte tabele
+
+select vc.*,c.email_client,c.telefon_client
+from vizualizare_comenzi vc
+join clienti c on vc.nume_client=c.nume_client;
+
+-- Exemplu de operatie LMD nepermisa pe vizualizare
+-- UPDATE:
+update vizualizare_comenzi
+set numar_comenzi = 10
+where nume_client = 'Dumitru';
+
+-- Cerinta 15
+
+-- o cerere ce utilizează operația outerjoin pe minimum 4 tabele
+-- Sa se afiseze numele magazinului, id-ul magazinului, id-ul produsului 
+-- si id-ul recenziei pentru fiecare inregistrare disponibila in baza de date. 
+select m.nume_magazin, pm.id_magazin, p.id_produs, r.id_recenzie
+
+from magazine m
+left join produse_magazine pm on m.id_magazin = pm.id_magazin
+inner join produse p on pm.id_produs = p.id_produs
+right join recenzii r on pm.id_produs = r.id_produs;
+
+-- o cerere ce utilizează operația division
+-- Verificati daca exista produse care au fost comandate de toti clientii.
+
+select
+case 
+    when count(*) > 0 then 'Exista produse'
+    else 'Nu exista produse'
+  end as rezultat
+from produse p
+where not exists (
+    select c.id_client
+    from clienti c
+    where not exists (
+        select pc.id_produs
+        from produse_comenzi pc
+        where pc.id_produs = p.id_produs
+        and pc.id_comanda in (
+            select co.id_comanda
+            from comenzi co
+            where co.id_client = c.id_client
+        )
+    )
+);
+
+-- o cerere care implementeaza analiza top-n
+-- Afiseaza primele 5 produse (descrescator) in functie de numarul de recenzii
+select *
+from (
+    select p.nume_produs, count(r.id_recenzie) as numar_recenzii
+    from produse p
+    left join produse_magazine pm on p.id_produs = pm.id_produs
+    left join recenzii r on pm.id_produs = r.id_produs
+    group by p.nume_produs
+    order by count(r.id_recenzie) desc
+)
+where rownum <= 3;
+
+-- Cerinta 16
+
+-- sa se afiseze clientii si informatii despre tipul de plata si costul transportului pentru toate comenzile nou aparute efectuate de acestia.
+
+-- Metoda 1.
+select cl.nume_client,cl.prenume_client,p.tip_plata,t.cost_transport,co.status_comanda
+from clienti cl
+join comenzi co on (cl.id_client=co.id_client)
+join plati p on (co.id_plata=p.id_plata)
+join transport t on (t.id_transport=co.id_transport)
+where lower(co.status_comanda) like 'noua'; 
+
+-- Metoda 2.
+create view vizualizare_comenzi_noi as
+select co.id_client,p.tip_plata,t.cost_transport,co.status_comanda
+from comenzi co
+join plati p on (co.id_plata=p.id_plata)
+join transport t on (t.id_transport=co.id_transport)
+where lower(co.status_comanda) like 'noua';
+
+select * from vizualizare_comenzi_noi;
+
+select cl.nume_client,cl.prenume_client,vcn.tip_plata,vcn.cost_transport,vcn.status_comanda
+from clienti cl
+join vizualizare_comenzi_noi vcn on (cl.id_client=vcn.id_client);
+
+-- Cerinta 18
