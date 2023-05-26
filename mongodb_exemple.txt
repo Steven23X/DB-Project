@@ -1,0 +1,46 @@
+// Sa se afiseze memoriile ram din baza de date
+use('mongodbVSCodePlaygroundDB');
+db.produse.aggregate([
+  {
+    $lookup: {
+      from: "categorii",
+      localField: "id_categorie",
+      foreignField: "id_categorie",
+      as: "categorie"
+    }
+  },
+  {
+    $unwind: "$categorie"
+  },
+  {
+    $lookup: {
+      from: "producatori",
+      localField: "id_producator",
+      foreignField: "id_producator",
+      as: "producator"
+    }
+  },
+  {
+    $unwind: "$producator"
+  },
+  {
+    $project: {
+      nume_produs: 1,
+      descriere_produs: 1,
+      pret_produs: 1,
+      stoc_produs: 1,
+      "categorie.nume_categorie": 1,
+      "producator.nume_producator": 1
+    }
+  },
+  {
+    $match: {
+      "categorie.nume_categorie": "Memorii RAM"
+    }
+  }
+]);
+
+
+// Sa se afiseze produsele cu un pret mai mare de 2500
+use('mongodbVSCodePlaygroundDB');
+db.produse.find({ pret_produs: { $gt: 5000 } });

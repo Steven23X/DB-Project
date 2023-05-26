@@ -1,0 +1,153 @@
+// Denumire baza de date.
+use('mongodbVSCodePlaygroundDB');
+
+// Creare colectii PRODUCATORI CATEGORII SI PRODUSE
+db.createCollection("producatori")
+
+db.producatori.insertOne({
+    id_producator: 16,
+    nume_producator: "Stentor",
+    tara_producator: "Romania"
+})
+
+db.producatori.insertOne({
+    id_producator: 17,
+    nume_producator: "PC Master",
+    tara_producator: "Germania"
+})
+
+db.producatori.insertOne({
+    id_producator: 18,
+    nume_producator: "HardwareCO",
+    tara_producator: "Franta"
+})
+
+db.producatori.insertOne({
+    id_producator: 19,
+    nume_producator: "VideoMaster",
+    tara_producator: "Italia"
+})
+
+db.producatori.insertOne({
+    id_producator: 20,
+    nume_producator: "SiSoft",
+    tara_producator: "Spania"
+})
+
+db.createCollection("categorii")
+
+db.categorii.insertOne({
+    id_categorie: 21,
+    nume_categorie: "Placi de baza",
+    descriere_categorie: "Categorie dedicata placilor de baza"
+})
+
+db.categorii.insertOne({
+    id_categorie: 22,
+    nume_categorie: "Procesoare",
+    descriere_categorie: "Categorie dedicata procesoarelor"
+})
+
+db.categorii.insertOne({
+    id_categorie: 23,
+    nume_categorie: "Placi video",
+    descriere_categorie: "Categorie dedicata placilor video"
+})
+
+db.categorii.insertOne({
+    id_categorie: 24,
+    nume_categorie: "Memorii RAM",
+    descriere_categorie: "Categorie dedicata modulelor de memorie RAM"
+})
+
+db.categorii.insertOne({
+    id_categorie: 25,
+    nume_categorie: "Stocare ROM",
+    descriere_categorie: "Categorie dedicata solutiilor de stocare"
+})
+
+use('mongodbVSCodePlaygroundDB');
+db.createCollection("produse")
+
+db.produse.insertMany([
+  {
+    nume_produs: 'ASUS ROG Strix X570-E Gaming',
+    descriere_produs: 'Placă de bază ATX pentru gaming, compatibilă cu procesoare AMD Ryzen',
+    pret_produs: 1599.99,
+    stoc_produs: 10,
+    id_producator: 16,
+    id_categorie: 21
+  },
+  {
+    nume_produs: 'Intel Core i9-10900K',
+    descriere_produs: 'Procesor Intel de ultimă generație cu 10 nuclee și 20 fire de execuție',
+    pret_produs: 2899.99,
+    stoc_produs: 5,
+    id_producator: 16,
+    id_categorie: 22
+  },
+  {
+    nume_produs: 'NVIDIA GeForce RTX 3080',
+    descriere_produs: 'Placă video high-end pentru gaming, cu 10 GB memorie GDDR6X',
+    pret_produs: 5299.99,
+    stoc_produs: 3,
+    id_producator: 17,
+    id_categorie: 23
+  },
+  {
+    nume_produs: 'Corsair Vengeance RGB Pro',
+    descriere_produs: 'Modul de memorie DDR4 cu iluminare RGB și capacitate de 16 GB',
+    pret_produs: 699.99,
+    stoc_produs: 20,
+    id_producator: 17,
+    id_categorie: 24
+  },
+  {
+    nume_produs: 'Samsung 970 EVO Plus',
+    descriere_produs: 'Solid State Drive NVMe cu capacitate de 1 TB și viteză de transfer ridicată',
+    pret_produs: 999.99,
+    stoc_produs: 8,
+    id_producator: 17,
+    id_categorie: 25
+  },
+  {
+    nume_produs: 'MSI B450 TOMAHAWK MAX',
+    descriere_produs: 'Placă de bază ATX pentru procesoare AMD Ryzen, suportă memorie DDR4',
+    pret_produs: 599.99,
+    stoc_produs: 15,
+    id_producator: 18,
+    id_categorie: 21
+  },
+  {
+    nume_produs: 'AMD Ryzen 7 5800X',
+    descriere_produs: 'Procesor AMD cu 8 nuclee și 16 fire de execuție, frecvență de bază 3.8 GHz',
+    pret_produs: 1999.99,
+    stoc_produs: 7,
+    id_producator: 18,
+    id_categorie: 22
+  },
+  {
+    nume_produs: 'Gigabyte GeForce GTX 1660 SUPER OC',
+    descriere_produs: 'Placă video performantă pentru gaming, 6 GB memorie GDDR6',
+    pret_produs: 1799.99,
+    stoc_produs: 10,
+    id_producator: 19,
+    id_categorie: 23
+  },
+  {
+    nume_produs: 'RAM Kingston HyperX Fury RGB',
+    descriere_produs: 'Modul de memorie DDR4 cu iluminare RGB și capacitate de 32 GB',
+    pret_produs: 1299.99,
+    stoc_produs: 12,
+    id_producator: 19,
+    id_categorie: 24
+  },
+  {
+    nume_produs: 'SSD Western Digital Blue',
+    descriere_produs: 'Solid State Drive SATA cu capacitate de 500 GB și viteză de transfer mare',
+    pret_produs: 399.99,
+    stoc_produs: 25,
+    id_producator: 20,
+    id_categorie: 25
+  }
+]);
