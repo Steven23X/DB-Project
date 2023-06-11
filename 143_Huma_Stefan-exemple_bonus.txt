@@ -1,5 +1,4 @@
 -- Cerinta 14
--- QT3Qk1PpCaGES9Ip
 
 -- Rezultatul final al vizualizarii va fi un set de date care va afisa numele si prenumele clientului,
 -- numarul total de comenzi, suma totala a platilor si data cea mai recenta de plasare

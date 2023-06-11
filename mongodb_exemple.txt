@@ -41,6 +41,6 @@ db.produse.aggregate([
 ]);
 
 
-// Sa se afiseze produsele cu un pret mai mare de 2500
+// Sa se afiseze produsele cu un pret mai mare de 5000
 use('mongodbVSCodePlaygroundDB');
 db.produse.find({ pret_produs: { $gt: 5000 } });
